@@ -40,11 +40,12 @@ Welcome to **Neuer: The Goalkeeper Game**! Put yourself in the shoes of the lege
     ```
 
 2.  **Controls**:
-    - **Left Arrow**: Dive Left
-    - **Right Arrow**: Dive Right
-    - **Up Arrow**: Jump / Block High Center
-    - **Down Arrow**: Stay Low / Ready Center
-    - **Space**: Restart Game (on Game Over screen)
+    - **Left / Right Arrows**: Move / Reposition the goalkeeper.
+    - **Up Arrow**: Jump high to block top-corner shots.
+    - **Space**: Dive!
+        - Press **Space** while moving (or holding) **Left/Right** to perform a diving save in that direction.
+        - Press **Space** while standing still to jump/block center.
+    - **Space** (on Game Over screen): Restart Game.
 
 3.  **Objective**:
     - Block the incoming balls!
