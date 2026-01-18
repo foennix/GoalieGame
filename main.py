@@ -102,7 +102,8 @@ def main():
                 start_x = SCREEN_WIDTH // 2
                 start_y = SCREEN_HEIGHT // 2 + 60
 
-                target_x = random.randint(100 + 20, SCREEN_WIDTH - 100 - 20)
+                # Goal posts at 200 and 600
+                target_x = random.randint(200 + 20, SCREEN_WIDTH - 200 - 20)
                 target_y = SCREEN_HEIGHT - 50
 
                 ball = Ball((start_x, start_y), (target_x, target_y), speed=base_speed)
@@ -139,8 +140,8 @@ def main():
         # Top line
         pygame.draw.line(screen, (255, 255, 255), (0, SCREEN_HEIGHT//2 + 50), (SCREEN_WIDTH, SCREEN_HEIGHT//2 + 50), 2)
         # Side lines
-        pygame.draw.line(screen, (255, 255, 255), (100, SCREEN_HEIGHT), (250, SCREEN_HEIGHT//2 + 50), 2)
-        pygame.draw.line(screen, (255, 255, 255), (SCREEN_WIDTH - 100, SCREEN_HEIGHT), (SCREEN_WIDTH - 250, SCREEN_HEIGHT//2 + 50), 2)
+        pygame.draw.line(screen, (255, 255, 255), (200, SCREEN_HEIGHT), (300, SCREEN_HEIGHT//2 + 50), 2)
+        pygame.draw.line(screen, (255, 255, 255), (SCREEN_WIDTH - 200, SCREEN_HEIGHT), (SCREEN_WIDTH - 300, SCREEN_HEIGHT//2 + 50), 2)
 
         all_sprites.draw(screen)
 

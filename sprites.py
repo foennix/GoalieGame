@@ -11,7 +11,9 @@ from assets import (
 class Goal(pygame.sprite.Sprite):
     def __init__(self, screen_width, screen_height):
         super().__init__()
-        self.image = pygame.Surface((screen_width - 100, screen_height - 100), pygame.SRCALPHA)
+        # Reduce goal width to make it coverable (Screen - 400)
+        # 800 - 400 = 400px wide. Posts at 200 and 600.
+        self.image = pygame.Surface((screen_width - 400, screen_height - 100), pygame.SRCALPHA)
 
         # Draw goal posts
         post_color = (200, 200, 200)
@@ -78,7 +80,7 @@ class Ball(pygame.sprite.Sprite):
             self.rect.center = old_center
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale=5):
+    def __init__(self, x, y, scale=10):
         super().__init__()
         self.scale = scale
         self.animations = {
@@ -114,18 +116,18 @@ class Player(pygame.sprite.Sprite):
             self.state = 'dive_left'
             self.image = self.animations['dive_left']
             self.rect = self.image.get_rect()
-            # Position the dive to the left of the center
-            self.rect.bottomright = (self.original_x, self.original_y)
-            self.action_end_time = pygame.time.get_ticks() + 1000 # 1 second action
+            # Position the dive to the left (shift center to cover left gap)
+            self.rect.midbottom = (self.original_x - 130, self.original_y)
+            self.action_end_time = pygame.time.get_ticks() + 500 # Faster recovery (0.5s)
 
     def dive_right(self):
         if self.state == 'idle':
             self.state = 'dive_right'
             self.image = self.animations['dive_right']
             self.rect = self.image.get_rect()
-            # Position the dive to the right of the center
-            self.rect.bottomleft = (self.original_x, self.original_y)
-            self.action_end_time = pygame.time.get_ticks() + 1000
+            # Position the dive to the right
+            self.rect.midbottom = (self.original_x + 130, self.original_y)
+            self.action_end_time = pygame.time.get_ticks() + 500
 
     def jump(self):
         if self.state == 'idle':
