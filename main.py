@@ -2,13 +2,9 @@ import pygame
 import random
 import sys
 import os
-import json
 from sprites import Player, Ball, Goal
+from constants import *
 
-# Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FPS = 60
 BG_COLOR = (34, 139, 34) # Grass Green
 HIGHSCORE_FILE = "highscore.txt"
 
@@ -46,19 +42,19 @@ def main():
     balls = pygame.sprite.Group()
 
     # Create Goal (Background)
-    goal = Goal(SCREEN_WIDTH, SCREEN_HEIGHT)
+    goal = Goal()
     all_sprites.add(goal)
 
     # Create Player (Foreground)
     # Position player at bottom center
-    player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50)
+    player = Player(SCREEN_WIDTH // 2, GROUND_Y)
     all_sprites.add(player)
 
     # Gameplay variables
     score = 0
     highscore = load_highscore()
     lives = 3
-    base_speed = 3
+    base_duration = 1500 # ms to reach goal (lower is faster)
     game_active = True
 
     ball_spawn_delay = 2000 # 2 seconds initially
@@ -75,25 +71,48 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if game_active:
                     if event.key == pygame.K_LEFT:
-                        player.dive_left()
+                        player.vel_x = -player.move_speed
                     elif event.key == pygame.K_RIGHT:
-                        player.dive_right()
+                        player.vel_x = player.move_speed
                     elif event.key == pygame.K_UP:
                         player.jump()
-                    elif event.key == pygame.K_DOWN:
-                        player.duck()
+                    elif event.key == pygame.K_SPACE:
+                        # Dive logic
+                        if player.vel_x < 0:
+                            player.dive_left()
+                        elif player.vel_x > 0:
+                            player.dive_right()
+                        else:
+                            # If stationary, check held keys or just jump?
+                            keys = pygame.key.get_pressed()
+                            if keys[pygame.K_LEFT]:
+                                player.dive_left()
+                            elif keys[pygame.K_RIGHT]:
+                                player.dive_right()
+                            else:
+                                player.jump()
                 else:
                     if event.key == pygame.K_SPACE:
                         # Reset Game
                         score = 0
                         lives = 3
-                        base_speed = 3
+                        base_duration = 1500
                         game_active = True
                         balls.empty()
                         all_sprites.empty()
                         all_sprites.add(goal)
                         all_sprites.add(player)
+                        # Reset player pos
+                        player.rect.midbottom = (SCREEN_WIDTH // 2, GROUND_Y)
                         last_spawn_time = current_time
+
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    if player.vel_x < 0:
+                        player.vel_x = 0
+                elif event.key == pygame.K_RIGHT:
+                    if player.vel_x > 0:
+                        player.vel_x = 0
 
         if game_active:
             # Spawn Balls
@@ -102,11 +121,12 @@ def main():
                 start_x = SCREEN_WIDTH // 2
                 start_y = SCREEN_HEIGHT // 2 + 60
 
-                # Goal posts at 200 and 600
-                target_x = random.randint(200 + 20, SCREEN_WIDTH - 200 - 20)
-                target_y = SCREEN_HEIGHT - 50
+                # Target anywhere within goal width
+                target_x = random.randint(GOAL_LEFT_X + 20, GOAL_RIGHT_X - 20)
+                # Target anywhere between ground and top bar
+                target_y = random.randint(GOAL_TOP_Y + 20, GROUND_Y)
 
-                ball = Ball((start_x, start_y), (target_x, target_y), speed=base_speed)
+                ball = Ball((start_x, start_y), (target_x, target_y), duration_ticks=base_duration)
                 balls.add(ball)
                 all_sprites.add(ball)
 
@@ -122,7 +142,7 @@ def main():
                 score += 100
                 print(f"SAVE! Score: {score}")
                 if score % 500 == 0:
-                    base_speed += 1
+                    base_duration = max(500, base_duration - 100) # Speed up by reducing duration
                     print("Level Up! Ball speed increased.")
 
             for ball in balls:
@@ -137,11 +157,14 @@ def main():
         screen.fill(BG_COLOR)
 
         # Draw the "Penalty Box" or field lines to give perspective
-        # Top line
+        # Top line (Horizon)
         pygame.draw.line(screen, (255, 255, 255), (0, SCREEN_HEIGHT//2 + 50), (SCREEN_WIDTH, SCREEN_HEIGHT//2 + 50), 2)
-        # Side lines
-        pygame.draw.line(screen, (255, 255, 255), (200, SCREEN_HEIGHT), (300, SCREEN_HEIGHT//2 + 50), 2)
-        pygame.draw.line(screen, (255, 255, 255), (SCREEN_WIDTH - 200, SCREEN_HEIGHT), (SCREEN_WIDTH - 300, SCREEN_HEIGHT//2 + 50), 2)
+
+        # Side lines matching goal posts
+        # Goal posts are at GOAL_LEFT_X and GOAL_RIGHT_X at GROUND_Y
+        # Perspective lines going to horizon
+        pygame.draw.line(screen, (255, 255, 255), (GOAL_LEFT_X, GROUND_Y), (GOAL_LEFT_X + 100, SCREEN_HEIGHT//2 + 50), 2)
+        pygame.draw.line(screen, (255, 255, 255), (GOAL_RIGHT_X, GROUND_Y), (GOAL_RIGHT_X - 100, SCREEN_HEIGHT//2 + 50), 2)
 
         all_sprites.draw(screen)
 
